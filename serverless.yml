@@ -1,0 +1,507 @@
+# NOTE: update this with your service name
+service: greenkode-app-apis
+
+# Create an optimized package for our functions
+#
+package:
+  individually: true
+
+plugins:
+  - serverless-bundle # Package our functions with Webpack
+  - serverless-offline
+  - serverless-dotenv-plugin # Load .env as environment variables
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: us-east-1
+  versionFunctions: false
+
+  logs:
+    restApi: true
+
+  environment:
+    tableName: wastes
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
+        - sns:SetSMSAttributes
+        - sns:Publish
+        - ses:*
+        - s3:PutObject
+      Resource: "*"
+      # UploadedS3Bucket:
+      #   Type: AWS::S3::Bucket
+      #   Properties:
+      #     BucketName: live-feed-logoInfo-uploadeds3bucket
+      #     CorsConfiguration:
+      #       CorsRules:
+      #         - AllowedHeaders:
+      #             - "*"
+      #           AllowedMethods:
+      #             - HEAD
+      #             - GET
+      #             - PUT
+      #             - POST
+      #             - DELETE
+      #           AllowedOrigins:
+      #             - "*"
+      #           ExposedHeaders:
+      #             - x-amz-server-side-encryption
+      #             - x-amz-request-id
+      #             - x-amz-id-2
+      #           MaxAge: 3000
+
+functions:
+  updateCapping:
+    handler: handler/caps/update-capping.main
+    events:
+      - http:
+          path: updateCapping
+          method: put
+          cors: true
+
+  updateRecommendedTargets:
+    handler: handler/targets/update-recommended-targets.main
+    events:
+      - http:
+          path: updateRecommendedTargets
+          method: put
+          cors: true
+
+  getTargets:
+    handler: handler/targets/get-targets.main
+    events:
+      - http:
+          path: getTargets
+          method: get
+          cors: true
+
+  getAllCompaniesBack:
+    handler: handler/master-table/get-all-companies-back.main
+    events:
+      - http:
+          path: getAllCompaniesBack
+          method: get
+          cors: true
+
+  getCapping:
+    handler: handler/caps/get-capping.main
+    events:
+      - http:
+          path: getCapping
+          method: get
+          cors: true
+
+  getMasterTableData:
+    handler: handler/master-table/access-master-table.main
+    events:
+      - http:
+          # path: masterTableData/{id}
+          path: masterTableData
+          method: get
+          cors: true
+
+  updateWasteForecastData:
+    handler: handler/trends/update-waste-forecast-report.main
+    events:
+      - schedule: cron(0 3 ? * MON *)
+      # - http:
+      #     path: updateWasteForecastData
+      #     method: get
+      #     cors: true
+
+  addUserToGroup:
+    handler: handler/auth/add-user-to-group.main
+    events:
+      - http:
+          path: addUserToGroup
+          method: post
+          cors: true
+
+  updateUserAttribute:
+    handler: handler/auth/update-user-attribute-for-adding-users.main
+    events:
+      - http:
+          path: updateUsersAttribute
+          method: post
+          cors: true
+
+  updateUsersAttributeForInternalUsage:
+    handler: handler/auth/update-user-attribute.main
+    events:
+      - http:
+          path: updateUsersAttributeForInternalUsage
+          method: post
+          cors: true
+
+  verifyEmailIdentity:
+    handler: handler/auth/verify-email-identity.main
+    events:
+      - http:
+          path: verifyEmailIdentity
+          method: post
+          cors: true
+
+  getCoverInput:
+    handler: handler/inputs/get-cover-input.main
+    events:
+      - http:
+          path: getCoverInput
+          method: get
+          cors: true
+
+  getSalesInput:
+    handler: handler/inputs/get-sales-input.main
+    events:
+      - http:
+          path: getSalesInput
+          method: get
+          cors: true
+
+  getAiPredictionData:
+    handler: handler/reports/get-ai-prediction-data.main
+    events:
+      - http:
+          path: getAiPredictionData
+          method: get
+          cors: true
+
+  getMonthlyWasteData:
+    handler: handler/reports/get-monthly-waste-data.main
+    events:
+      - http:
+          path: getMonthlyWasteData
+          method: get
+          cors: true
+
+  getLastYearMonthlyWasteData:
+    handler: handler/reports/get-last-year-monthly-data.main
+    events:
+      - http:
+          path: getLastYearMonthlyWaste
+          method: get
+          cors: true
+
+  getWeeklyWasteData:
+    handler: handler/reports/get-weekly-waste-data.main
+    events:
+      - http:
+          path: getWeeklyWasteData
+          method: get
+          cors: true
+
+  getTopCausesOfWaste:
+    handler: handler/reports/get-top-causes-food-waste.main
+    events:
+      - http:
+          path: getTopCausesOfWaste
+          method: get
+          cors: true
+
+  addCoverInput:
+    handler: handler/inputs/add-cover-input.main
+    events:
+      - http:
+          path: addCoverInput
+          method: post
+          cors: true
+
+  addSalesInput:
+    handler: handler/inputs/add-sales-input.main
+    events:
+      - http:
+          path: addSalesInput
+          method: post
+          cors: true
+
+  addMenuInput:
+    handler: handler/inputs/add-menu-input.main
+    events:
+      - http:
+          path: addMenuInput
+          method: put
+          cors: true
+
+  getMenuInput:
+    handler: handler/inputs/get-menu-input.main
+    events:
+      - http:
+          path: getMenuInput
+          method: get
+          cors: true
+
+  createUserLoginTime:
+    handler: handler/users-login-time/create-user-login-time.main
+    events:
+      - http:
+          path: createUserLoginTime
+          method: post
+          cors: true
+
+  updateUsersLoginTime:
+    handler: handler/users-login-time/update-users-login-time.main
+    events:
+      - http:
+          path: updateUsersLoginTime/{id}
+          method: put
+          cors: true
+
+  getUsersLoginTime:
+    handler: handler/users-login-time/get-users-login-time.main
+    events:
+      - http:
+          path: getLoginTimeFromUsers
+          method: get
+          cors: true
+
+  getAllSitesData:
+    handler: handler/reports/get-all-sites-data.main
+    events:
+      - http:
+          path: getAllSitesData
+          method: get
+          cors: true
+
+  getDailyAndWeeklyDatesData:
+    handler: handler/reports/get-daily-and-weeky-dates-data.main
+    events:
+      - http:
+          path: getDailyAndWeeklyDatesData
+          method: get
+          cors: true
+
+  getWastePerCoverData:
+    handler: handler/correlated-data/get-waste-per-cover-data.main
+    events:
+      - http:
+          path: getWastePerCoverData
+          method: get
+          cors: true
+
+  getWastePerSalesData:
+    handler: handler/correlated-data/get-waste-per-sales-data.main
+    events:
+      - http:
+          path: getWastePerSalesData
+          method: get
+          cors: true
+
+  getNumberOfCompanyInMasterTable:
+    handler: handler/master-table/get-number-of-company-from-master-table.main
+    events:
+      - http:
+          path: getNumberOfCompanyFromMasterTable
+          method: get
+          cors: true
+
+  getWasteOnADayOfTheWeek:
+    handler: handler/reports/get-waste-on-a-day-of-the-week.main
+    events:
+      - http:
+          path: getWasteOnADayOfTheWeek
+          method: get
+          cors: true
+
+  sendEmailWasteReport:
+    handler: handler/alerts/email-weekly-waste-reports.main
+    events:
+      - schedule: cron(0 13 ? * MON *)
+      # - http:
+      #     path: sendEmailWasteReports
+      #     method: get
+      #     cors: true
+
+  sendEmailWeeklyTrendsReport:
+    handler: handler/alerts/email-trends-weekly-waste.main
+    events:
+      - schedule: cron(0 14 ? * MON *)
+      # - http:
+      #     path: sendEmailWeeklyTrendsReport
+      #     method: get
+      #     cors: true
+
+  sendEmailAlertForAiPrediction:
+    handler: handler/alerts/email-aiprediction.main
+    events:
+      - schedule: cron(0 15 ? * MON *)
+      # - http:
+      #     path: sendEmailAlertForAiPrediction
+      #     method: get
+      #     cors: true
+
+  sendEmailMonthlyTrendsReport:
+    handler: handler/alerts/email-trends-monthly-waste.main
+    events:
+      - schedule: cron(0 15 1 * ? *)
+      # - http:
+      #     path: sendEmailMonthlyTrendsReport
+      #     method: get
+      #     cors: true
+
+  sendSmsAlertsForInputs:
+    handler: handler/alerts/send-sms-alerts-for-inputs.main
+    events:
+      # - schedule: cron(0 12 ? * SUN *)
+      - http:
+          path: sendSmsAlertsForInputs
+          method: get
+          cors: true
+
+  sendSmsAlertsForHourlyWaste:
+    handler: handler/alerts/send-sms-alerts-for-hourly-waste.main
+    events:
+      - http:
+          path: sendSmsAlertsForHourlyWaste
+          method: get
+          cors: true
+
+  sendSmsAlertsForDailyWaste:
+    handler: handler/alerts/send-sms-alerts-for-daily-waste.main
+    events:
+      # - schedule: cron(0 14 * * ? *)
+      - http:
+          path: sendSmsAlertsForDailyWaste
+          method: get
+          cors: true
+
+  sendSmsAlertsForWastePerCover:
+    handler: handler/alerts/send-sms-alerts-for-waste-per-cover.main
+    events:
+      # - schedule: cron(0 15 * * ? *)
+      - http:
+          path: sendSmsAlertsForWastePerCover
+          method: get
+          cors: true
+
+  sendSmsAlertsForWeeklyWaste:
+    handler: handler/alerts/send-sms-alerts-for-weekly-waste.main
+    events:
+      # - schedule: cron(0 12 ? * MON *)
+      - http:
+          path: sendSmsAlertsForWeeklyWaste
+          method: get
+          cors: true
+
+  sendSmsAlertsForMonthlyWaste:
+    handler: handler/alerts/send-sms-alerts-for-monthly-waste.main
+    events:
+      # - schedule: cron(0 15 1 * ? *)
+      - http:
+          path: sendSmsAlertsForMonthlyWaste
+          method: get
+          cors: true
+
+  getPerformanceData:
+    handler: handler/reports/get-performance-summary.main
+    events:
+      - http:
+          path: getPerformanceData
+          method: get
+          cors: true
+
+  getProductionPreparationInputs:
+    handler: handler/inputs/get-production-preparation.main
+    events:
+      - http:
+          path: getProductionPreparationInputs
+          method: get
+          cors: true
+
+  addProductionPreparationInputs:
+    handler: handler/inputs/add-production-preparation.main
+    events:
+      - http:
+          path: addProductionPreparationInputs
+          method: put
+          cors: true
+
+  getProductionPreparationInputsForGraph:
+    handler: handler/reports/get-production-preparation-data.main
+    events:
+      - http:
+          path: getProductionPreparationInputsForGraph
+          method: get
+          cors: true
+
+  getWasteLabels:
+    handler: handler/reports/get-waste-labels.main
+    events:
+      - http:
+          path: getWasteLabels
+          method: get
+          cors: true
+
+  getPublicLiveFeed:
+    handler: handler/live-feed/get-public-live-feed.main
+    events:
+      - http:
+          path: getPublicLiveFeed
+          method: get
+          cors: true
+
+  getWeeklySurveyResults:
+    handler: handler/live-feed/get-weekly-survey-results.main
+    events:
+      - http:
+          path: getWeeklySurveyResults
+          method: get
+          cors: true
+
+  postWeeklySurveyResults:
+    handler: handler/live-feed/update-weekly-survey-results.main
+    events:
+      - http:
+          path: postWeeklySurveyResults
+          method: post
+          cors: true
+
+  updateLiveFeedContent:
+    handler: handler/live-feed/update-live-feed-content.main
+    events:
+      - http:
+          path: updateLiveFeedContent
+          method: post
+          cors: true
+
+  getLiveFeedContent:
+    handler: handler/live-feed/get-live-feed-content.main
+    events:
+      - http:
+          path: getLiveFeedContent
+          method: get
+          cors: true
+
+  filterLiveFeedContent:
+    handler: handler/live-feed/filter-live-feed-content.main
+    events:
+      - http:
+          path: filterLiveFeedContent
+          method: get
+          cors: true
+
+  getIdCustomerWaste:
+    handler: handler/reports/get-id-customer-waste.main
+    events:
+      - http:
+          path: getIdCustomerWaste
+          method: get
+          cors: true
+
+# Create our resources with separate CloudFormation templates
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
